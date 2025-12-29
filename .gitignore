@@ -1,0 +1,11 @@
+db-data/
+.env
+.DS_STORE #for Mac
+
+*.env
+package-lock.json
+server/.idea/workspace.xml
+__pycache__
+.idea
+.vscode/
+.venv/

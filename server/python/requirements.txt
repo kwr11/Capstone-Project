@@ -1,0 +1,6 @@
+Flask
+psycopg2-binary==2.9.9
+python-dotenv
+pytest
+flask-jwt-extended
+bcrypt

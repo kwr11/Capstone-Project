@@ -1,0 +1,81 @@
+services:
+  db:
+    env_file: ./server/db/.db.env
+    image: postgres:17-trixie
+    container_name: crm_postgres_db
+    restart: unless-stopped
+    shm_size: 128mb
+    volumes:
+      - ./server/db/db-data:/var/lib/postgresql/data
+      - ./server/db/init-scripts/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      - ./server/db/init-scripts:/docker-entrypoint-initdb.d:ro
+    ports:
+      - 5432:5432
+    networks:
+      - "crm-internal-net"
+  adminer:
+    image: adminer
+    restart: unless-stopped
+    ports:
+      - 8080:8080
+    networks:
+      - "crm-internal-net"
+      - "dmz" 
+  server:
+    build:
+      context: "./server/python"
+      dockerfile: "./Dockerfile"
+    container_name: crm_flask_server
+    env_file:
+      - ./server/db/.db.env
+      - ./server/python/.py.env
+    restart: unless-stopped
+    depends_on:
+      - db
+    volumes:
+      - ./server/python/:/app
+    ports:
+      - 8000:5000
+    networks:
+      - "crm-internal-net"
+      - "dmz"
+  app:
+    image: node:20
+    command: sh -c "npm i && npm run dev"
+    working_dir: /client
+    ports:
+      - 3000:3000
+    volumes:
+      - ./client/:/client
+      - /client/node_modules
+    environment: # used for development to allow hot-reloading
+      - CHOKIDAR_USEPOLLING=true
+      - WATCHPACK_POLLING=true
+    networks:
+      - "dmz"
+  caddy:
+    image: caddy:latest
+    container_name: crm_caddy_server
+    environment:
+      DOMAIN: "localhost"
+      CADDY_GLOBAL: "local_certs"
+    restart: unless-stopped
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - ./server/caddy/Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    networks:
+      - "dmz"
+networks:
+  crm-internal-net:
+    driver: bridge
+    internal: true
+  dmz:
+    driver: bridge
+volumes:
+  caddy_data:
+  caddy_config:
+

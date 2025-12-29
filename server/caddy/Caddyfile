@@ -1,0 +1,13 @@
+{
+	{$CADDY_GLOBAL}
+}
+
+app.{$DOMAIN} {
+	reverse_proxy http://app:3000
+}
+server.{$DOMAIN} {
+	reverse_proxy http://server:5000
+}
+adminer.{$DOMAIN} {
+	reverse_proxy http://adminer:8080
+}

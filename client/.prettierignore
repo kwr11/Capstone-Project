@@ -1,0 +1,13 @@
+# Ignore artifacts:
+build
+coverage
+.prettierrc
+components.json
+eslint.config.mjs
+next.config.ts
+package-lock.json
+pnpm-lock.yaml
+postcss.config.mjs
+README.md
+tsconfig.json
+src/components/ui
